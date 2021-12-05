@@ -1,0 +1,97 @@
+@import "fonts";
+// @import "enhanced_fonts";
+@import "mq";
+@import "palette";
+@import "enhancer";
+// gu_grid pulls the css for gs-container and content__main-column
+// @import "gu_grid";
+@import "scrolly";
+
+.interactive-atom {
+    margin: 0;
+    padding: 0;
+}
+
+// for apps adds extra padding. Needed to make dark mode work
+.ios, .android {
+    .interactive-atom {
+        padding: 8px;
+    }
+}
+
+.covid-line{
+	fill:none;
+	stroke-width:2px;
+}
+
+.deaths-line{
+	stroke:red;
+}
+
+.vaccines-line{
+	stroke:green;
+}
+
+.deaths-area{
+	fill:red;
+	opacity:.2;
+}
+
+.vaccines-area{
+	fill:green;
+	opacity:.2;
+}
+
+.deaths-dot{
+	fill:red;
+}
+
+.vaccines-dot{
+	fill:green;
+}
+
+
+.scroll-blobs{
+
+	position: sticky;
+
+
+ 	@include mq($from: 100px,  $until: 499px) {
+
+		top:calc( calc(100vh /2) + 25px);
+
+	}
+
+	.scroll-text__inner {
+
+		opacity: .2;
+		position: sticky;
+		//top:0;
+
+		max-width: 330px;
+
+		@include mq($from: 100px, $until: 499px) {
+			max-width: 100%;
+		}
+
+
+		width: 100%;
+		text-align: left;
+		margin-left: 0px;
+		padding: 6px 10px 0px;
+		    padding-top: 6px;
+		    padding-bottom: 0px;
+		font-size: 28px;
+		line-height: 32px;
+		font-family: "Guardian Headline","Guardian Egyptian Web","Guardian Headline Full",Georgia,serif;
+		font-weight: normal;
+		color: #000;
+		font-size: 16px;
+		line-height: 22px;
+		padding-top: 4px;
+		padding-bottom: 6px;
+
+
+	}
+} 
+

@@ -1,7 +1,70 @@
+@import "fonts";
+// @import "enhanced_fonts";
+@import "mq";
+@import "palette";
+@import "enhancer";
+// gu_grid pulls the css for gs-container and content__main-column
+// @import "gu_grid";
+//@import "scrolly";
+
+.interactive-atom {
+    margin: 0;
+    padding: 0;
+}
+
+// for apps adds extra padding. Needed to make dark mode work
 .ios, .android {
+    .interactive-atom {
+        padding: 8px;
+    }
     .article {
         overflow: visible !important;
     }
+}
+
+.uk-covid-wrapper{
+	position: relative;
+	width: 100%;
+}
+
+.covid-line{
+	fill:none;
+	stroke-width:2px;
+}
+
+.deaths-line{
+	stroke:red;
+}
+
+.vaccines-line{
+	stroke:green;
+}
+
+.deaths-area{
+	fill:red;
+	opacity:.2;
+}
+
+.vaccines-area{
+	fill:green;
+	opacity:.2;
+}
+
+.deaths-dot{
+	fill:red;
+}
+
+.vaccines-dot{
+	fill:green;
+}
+
+.annotation-dot{
+	fill:none;
+	stroke:black;
+}
+
+.stringency-rect{
+	stroke:none;
 }
 
 .scroll-wrapper {
@@ -62,11 +125,12 @@
 .scroll-text {
     position: absolute;
     top: 0;
+    left: calc(50% - 150px);
     //pointer-events: none;
 }
 
 .scroll-text__div {
-    max-width: 620px;
+    max-width: 300px;
     width: 100%;
     @include mq(desktop) {
         width: 620px;
@@ -85,7 +149,7 @@
 
 .scroll-text__inner {
     box-sizing: border-box;
-    //height: 100vh;
+    height: 100vh;
     position: relative;
     z-index: 100;
 
@@ -100,3 +164,5 @@
         }
     }
 }
+
+
