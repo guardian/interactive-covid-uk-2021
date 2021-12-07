@@ -6,13 +6,14 @@ import moment from 'moment'
 const d3 = Object.assign({}, d3B);
 
 const atomEl = d3.select('.uk-covid-wrapper').node();
+const tooltip = d3.select('.chart-data');
 
 const isMobile = window.top.matchMedia('(max-width: 600px)').matches;
 
-const width = atomEl.getBoundingClientRect().width;
-const height = window.top.innerHeight;
+const width = isMobile ? atomEl.getBoundingClientRect().width : atomEl.getBoundingClientRect().width * .6;
+const height = isMobile ? window.top.innerHeight / 2 : window.top.innerHeight * .6;
 
-const margin = {left:0, top:10, right:0, bottom:100}
+const margin = {left:25, top:height * .4, right:55, bottom:20}
 
 const chart = d3.select('.uk-covid-wrapper')
 .append('svg')
@@ -21,14 +22,46 @@ const chart = d3.select('.uk-covid-wrapper')
 .attr('height', height);
 
 const defs = chart.append('defs')
+
+let mask = defs
 .append('clipPath')
 .attr('id', 'clip-mask')
 
+let linearGradient = defs.append('linearGradient')
+.attr('id','grad1')
+.attr('x1', '0%')
+.attr('y1', '0%')
+.attr('x2', '100%')
+.attr('y2', '0%')
+
+let gradient = chart
+.append('rect')
+.attr('width', width)
+.attr('height', height)
+.style('fill', 'url(#grad1')
+.style('clip-path', 'url(#clip-mask)')
+
+const gradientTones = ['#ffffff', '#dadada', '#bdbdbd', '#a1a1a1', '#848484'];
+
+const colorScale = d3.scaleThreshold()
+.range(gradientTones)
+.domain([20,40,60,80,100]);
 
 const axis = chart.append('g')
 const areas = chart.append('g')
 const lines = chart.append('g')
 const dots = chart.append('g')
+
+
+let deathsArea = lines.append('path').attr("class", "covid-area deaths-area")
+let vaccinesArea = lines.append('path').attr("class", "covid-area vaccines-area")
+let boostArea = lines.append('path').attr("class", "covid-area vaccines-area")
+
+let deathsLine = lines.append("path").attr("class", "covid-line deaths-line")
+let vaccinesLine = lines.append("path").attr("class", "covid-line vaccines-line")
+let boostLine = lines.append("path").attr("class", "covid-line boost-line")
+
+let maskArea = d3.select('#clip-mask').append('path').attr("class", "covid-area")
 
 d3.json('https://interactive.guim.co.uk/docsdata-test/1XymBcR_xu0GwpGFsoICE22NH1o_beJ5BiINB6NS6fLg.json')
 .then(rawdata => {
@@ -41,11 +74,66 @@ d3.json('https://interactive.guim.co.uk/docsdata-test/1XymBcR_xu0GwpGFsoICE22NH1
 
 		let index = +d.stringency_index == 0 ? null : +d.stringency_index;
 
-		return {date:moment(d.Day, 'DD/MM/YYYY'), deaths:+d.cum_deaths, vaccines:+d.fully_vaccinated_rate, booster:+d.booster_rate, stringency:index, title:d.annotation_title, text:d.annotation_text}
+		return {date:moment(d.Day, 'DD/MM/YYYY'), deaths:+d.cum_deaths, vaccines:+d.fully_vaccinated_rate, booster:+d.booster_rate, stringency:+d.stringency_index, ranking:d.stringency_ranking, title:d.annotation_title, text:d.annotation_text}
 		
 	});
 
+	let stringency = {date:dataObj[0].date, stringency:dataObj[0].stringency};
+
+	linearGradient.append('stop')
+	.attr('offset', '0%')
+	.style('stop-color',colorScale(stringency.stringency))
+
+	const stringencyDates = dataObj.map((d,i) => {
+
+		if(d.stringency != stringency.stringency){
+
+			console.log(stringency.stringency , d.stringency, d.date.format('DD/MM/YYYY'))
+
+			linearGradient.append('stop')
+			.attr('offset', 0.27397260274 * i + '%')
+			.style('stop-color',colorScale(stringency.stringency))
+
+			stringency = {date:d.date, stringency:d.stringency};
+
+			linearGradient.append('stop')
+			.attr('offset', 0.27397260274 * i + '%')
+			.style('stop-color',colorScale(d.stringency))
+		}
+	})
+
 	const annotationDates = dataObj.filter(d => d.text != '')
+
+	annotationDates.forEach((d,i) => {
+
+		if(d.text != '')
+		{
+
+			let blob = d3.select('.scroll-text')
+			.append('div')
+			.attr('class', 'scroll-text__inner')
+			.style('height', height + 'px')
+			
+			let div = blob.append('div')
+			.attr('class','scroll-text__div')
+
+			div
+			.append('p')
+			.attr('class','date')
+			.html(d.date.format('MMM Do'))
+			
+			div
+			.append('h3')
+			.html(d.title)
+
+			div
+			.append('p')
+			.attr('class','paragraph')
+			.html(d.text)
+
+		}
+	})
+
 
 	const datesExtent = d3.extent(dataObj, d => d.date);
 
@@ -91,7 +179,8 @@ d3.json('https://interactive.guim.co.uk/docsdata-test/1XymBcR_xu0GwpGFsoICE22NH1
 	.attr("transform", `translate(${margin.left},0)`)
 	.call(
 		d3.axisLeft(yDeathsScale)
-		.ticks(10)
+		.ticks(4)
+		.tickSizeInner(-width + margin.right)
 		)
 	.selectAll("text")
 	.text(d => (+d).toLocaleString('en-GB',{maximumFractionDigits: 0}))
@@ -101,21 +190,10 @@ d3.json('https://interactive.guim.co.uk/docsdata-test/1XymBcR_xu0GwpGFsoICE22NH1
 	.attr("transform", `translate(${width - margin.right},0)`)
 	.call(
 		d3.axisRight(yVaccinesScale)
-		.ticks(10)
+		.ticks(4)
 		)
 	.selectAll("text")
 	.text(d => (+d).toLocaleString('en-GB',{maximumFractionDigits: 0}))
-
-	let deathsLine = lines.append("path").attr("class", "covid-line deaths-line")
-	let deathsArea = lines.append('path').attr("class", "covid-area deaths-area")
-	let vaccinesLine = lines.append("path").attr("class", "covid-line vaccines-line")
-	let vaccinesArea = lines.append('path').attr("class", "covid-area vaccines-area")
-	let boostLine = lines.append("path").attr("class", "covid-line vaccines-line")
-	let boostArea = lines.append('path').attr("class", "covid-area vaccines-area")
-
-
-
-	let maskArea = d3.select('#clip-mask').append('path').attr("class", "covid-area")
 
 	let deathsDot = dots.append('circle')
 	.attr('r', 6)
@@ -129,6 +207,12 @@ d3.json('https://interactive.guim.co.uk/docsdata-test/1XymBcR_xu0GwpGFsoICE22NH1
 	.attr('cy', yVaccinesScale(dataObj[0].vaccines))
 	.attr('class', 'vaccines-dot')
 
+	let boostDot = dots.append('circle')
+	.attr('r', 6)
+	.attr('cx', xScale(dataObj[0].date))
+	.attr('cy', yVaccinesScale(dataObj[0].booster))
+	.attr('class', 'boost-dot')
+
 	let deathsLabel = dots.append('text')
 	.attr('cx', xScale(dataObj[0].date))
 	.attr('cy', yDeathsScale(dataObj[0].deaths))
@@ -139,65 +223,18 @@ d3.json('https://interactive.guim.co.uk/docsdata-test/1XymBcR_xu0GwpGFsoICE22NH1
 	.attr('cy', yVaccinesScale(dataObj[0].vaccines))
 	.attr('class', 'vaccines-text')
 
-	const colors = ['#dadada', '#bdbdbd', '#a1a1a1', '#848484', '#676767'];
-
-	const stringencyExtent = d3.extent(dataObj.map(d => d.stringency))
-
-	const buckets = [20,40,60,80,100]
-
-	let colorScale = d3.scaleThreshold()
-	.range(colors)
-	.domain(buckets);
-
-
-	areas.selectAll('rect')
-	.data(dataObj.filter(f => f.stringency ))
-	.enter()
-	.append('rect')
-	.attr('class', 'stringency-rect')
-	.style('clip-path', 'url(#clip-mask)')
-	.attr('width', width / dates.length)
-	.attr('height', height - margin.bottom - margin.top)
-	.attr('x', (d,i) => `${(width / dates.length) * i}px`)
-	.attr('y', margin.top + 'px')
-	.style('fill', d => colorScale(d.stringency))
-
-	annotationDates.forEach((d,i) => {
-
-		if(d.text != '')
-		{
-
-			let blob = d3.select('.scroll-text')
-			.append('div')
-			.attr('class', 'scroll-text__inner')
-			
-			let div = blob.append('div')
-			.attr('class','scroll-text__div')
-
-			div
-			.append('span')
-			.html(d.date)
-			
-			div
-			.append('h3')
-			.html(d.title)
-
-			div
-			.append('p')
-			.html(d.text)
-
-		}
-	})
 
 	const scrolly = new ScrollyTeller({
 		parent: document.querySelector("#gv-scrolly-1"),
-	    triggerTop: .3, // percentage from the top of the screen that the trigger should fire
+	    triggerTop: 0.01/*(height / 2) / window.top.innerHeight */, // percentage from the top of the screen that the trigger should fire
 	    triggerTopMobile: 0.75,
 	    transparentUntilActive: true,
 	    overall: () => {}
 	})
 
-	let currentBlob = 0;
+	//let prevHeight = +d3.select('.scroll-wrapper').style('height').split('px')[0];
+
+	//d3.select('.scroll-wrapper').style('height', prevHeight + window.top.innerHeight + 'px')
 
 	scrolly.gradual( (progressInBox, i, abs, total) => {
 
@@ -229,8 +266,6 @@ d3.json('https://interactive.guim.co.uk/docsdata-test/1XymBcR_xu0GwpGFsoICE22NH1
 				return area(allData)
 			})
 
-
-
 			vaccinesLine
 			.attr("d", () => {
 				line.y(d => yVaccinesScale(d.vaccines))
@@ -249,8 +284,6 @@ d3.json('https://interactive.guim.co.uk/docsdata-test/1XymBcR_xu0GwpGFsoICE22NH1
 				return area(allData)
 			});
 
-
-
 			boostLine
 			.attr("d", () => {
 
@@ -260,12 +293,29 @@ d3.json('https://interactive.guim.co.uk/docsdata-test/1XymBcR_xu0GwpGFsoICE22NH1
 				return line(allData)
 			})
 
-			maskArea.attr('d', deathsArea.attr('d') + vaccinesArea.attr('d'))
+			boostArea
+			.attr("class", "covid-area boost-area")
+			.attr("d", () => {
 
+				area.y1(line.y())
+				area.defined(line.defined())
+
+				return area(allData)
+			});
+ 
+			maskArea
+			.attr('d', deathsArea.attr('d') + vaccinesArea.attr('d'))
 
 			if(currentData.at(-1))
 			{
-				d3.select('.chart-data').html(currentData.at(-1).date)
+				tooltip.html(`
+					${currentData.at(-1).date.format('MMM Do')}<br>
+					${currentData.at(-1).ranking}<br>
+					${currentData.at(-1).deaths}<br>
+					${currentData.at(-1).vaccines}<br>
+					${currentData.at(-1).booster}
+					`)
+				tooltip.style('left', xScale(currentData.at(-1).date) + 'px')
 
 				deathsDot
 				.attr('cx', xScale(currentData.at(-1).date))
@@ -274,9 +324,21 @@ d3.json('https://interactive.guim.co.uk/docsdata-test/1XymBcR_xu0GwpGFsoICE22NH1
 				vaccinesDot
 				.attr('cx', xScale(currentData[currentData.length-1].date))
 				.attr('cy', yVaccinesScale(currentData[currentData.length-1].vaccines))
+
+				boostDot
+				.attr('cx', xScale(currentData[currentData.length-1].date))
+				.attr('cy', yVaccinesScale(currentData[currentData.length-1].booster))
 			}
 			else{
-				d3.select('.chart-data').html(annotationDates[i].date)
+
+				tooltip.html(`
+					${annotationDates[i].date.format('MMM Do')}<br>
+					${annotationDates[i].ranking}<br>
+					${annotationDates[i].deaths}<br>
+					${annotationDates[i].vaccines}<br>
+					${annotationDates[i].booster}
+					`)
+				tooltip.style('left',xScale(annotationDates[i].date) + 'px')
 
 				deathsDot
 				.attr('cx', xScale(annotationDates[i].date))
@@ -285,6 +347,10 @@ d3.json('https://interactive.guim.co.uk/docsdata-test/1XymBcR_xu0GwpGFsoICE22NH1
 				vaccinesDot
 				.attr('cx', xScale(annotationDates[i].date))
 				.attr('cy', yVaccinesScale(annotationDates[i].vaccines))
+
+				boostDot
+				.attr('cx', xScale(annotationDates[i].date))
+				.attr('cy', yVaccinesScale(annotationDates[i].booster))
 			}
 
 			

@@ -8,18 +8,18 @@
 //@import "scrolly";
 
 .interactive-atom {
-    margin: 0;
-    padding: 0;
+	margin: 0;
+	padding: 0;
 }
 
 // for apps adds extra padding. Needed to make dark mode work
 .ios, .android {
-    .interactive-atom {
-        padding: 8px;
-    }
-    .article {
-        overflow: visible !important;
-    }
+	.interactive-atom {
+		padding: 8px;
+	}
+	.article {
+		overflow: visible !important;
+	}
 }
 
 .uk-covid-wrapper{
@@ -27,35 +27,58 @@
 	width: 100%;
 }
 
-.covid-line{
+.covid-line, .deaths-line, .boost-line{
 	fill:none;
-	stroke-width:2px;
+	stroke-width:6px;
+	stroke-linecap: round;
 }
 
 .deaths-line{
-	stroke:red;
+	stroke:#cc0a11;
+	filter: drop-shadow(0 2px 2px rgba(0, 0, 0, .3));
+	filter: drop-shadow(0 2px 2px rgba(0, 0, 0, .3));
 }
 
 .vaccines-line{
-	stroke:green;
+	stroke:#056da1;
+	filter: drop-shadow(0 2px 2px rgba(0, 0, 0, .3));
 }
 
+.boost-line{
+	stroke:#056da1;
+	filter: drop-shadow(0 2px 2px rgba(0, 0, 0, .3));
+}
+
+//<blend-mode> = normal | multiply | screen | overlay | darken | lighten | color-dodge | color-burn | hard-light | soft-light | difference | exclusion | hue | saturation | color | luminosity
+
 .deaths-area{
-	fill:red;
-	opacity:.2;
+	fill:#cc0a11;
+	mix-blend-mode: color;
 }
 
 .vaccines-area{
-	fill:green;
-	opacity:.2;
+	fill:#056da1;
+	mix-blend-mode: color;
+}
+
+.boost-area{
+	fill:#e6f5ff;
+	mix-blend-mode: lighten;
 }
 
 .deaths-dot{
-	fill:red;
+	fill:#cc0a11;
+	filter: drop-shadow(0 2px 2px rgba(0, 0, 0, .3));
 }
 
 .vaccines-dot{
-	fill:green;
+	fill:#056da1;
+	filter: drop-shadow(0 2px 2px rgba(0, 0, 0, .3));
+}
+
+.boost-dot{
+	fill:#056da1;
+	filter: drop-shadow(0 2px 2px rgba(0, 0, 0, .3));
 }
 
 .annotation-dot{
@@ -67,78 +90,116 @@
 	stroke:none;
 }
 
+.leftAxis{
+	@include fs-textSans(1);
+	text{
+		fill:#cc0a11;
+	}
+
+	.tick{
+		line{stroke:white;opacity: .5;}
+	}
+}
+
+.rightAxis{
+	@include fs-textSans(1);
+	text{
+		fill:#056da1;
+	}
+
+	.tick{
+		line{display: none;}
+	}
+}
+
+.domain{
+	display: none;
+}
+
+.chart-data{
+	position: absolute;
+
+	@include fs-headline(5);
+}
+
 .scroll-wrapper {
-    @include mq(tablet) {
-        width: 740px;
-    }
+	@include mq(tablet) {
+		width: 740px;
+	}
 
-    @include mq(desktop) {
-        width:960px;
-    }
+	@include mq(desktop) {
+		width:960px;
+	}
 
-    @include mq(leftCol) {
-        width: 1140px;
-    }
-    @include mq(wide) {
-        width: 1260px;
-    }
-    box-sizing: border-box;
-    margin: auto;
-    background-color:#fff;
-    position: relative;
-    z-index: 100;
-    border-top: 1px solid #dcdcdc;
-    margin-top: 36px;
-    margin-bottom: 36px;
-    border-bottom: 1px solid #dcdcdc;
+	@include mq(leftCol) {
+		width: 1140px;
+	}
+	@include mq(wide) {
+		width: 1260px;
+	}
+	box-sizing: border-box;
+	margin: auto;
+	background-color:#fff;
+	position: relative;
+	z-index: 100;
+	border-top: 1px solid #dcdcdc;
+	margin-top: 36px;
+	margin-bottom: 36px;
+	border-bottom: 1px solid #dcdcdc;
 }
 
 .scroll-inner {
-    position: -webkit-sticky;
-    position: sticky;
-    width: 100%;
-    top: 0;
-    height: auto;
-    max-height: 100vh;
+	position: -webkit-sticky;
+	position: sticky;
+	width: 100%;
+	top: 0;
+	height: auto;
+	max-height: 100vh;
+	background: white;
 
-    &.fixed-top {
-        position: fixed;
-    }
+	&.fixed-top {
+		position: fixed;
+	}
 
-    &.absolute-top {
-        position: absolute;
-    }
+	&.absolute-top {
+		position: absolute;
+	}
 
-    &.absolute-bottom {
-        position: absolute;
-        top: auto;
-        @include mq(tablet) {
-            bottom: 0;
-        }
-    }
+	&.absolute-bottom {
+		position: absolute;
+		top: auto;
+		@include mq(tablet) {
+			bottom: 0;
+		}
+	}
 
-    svg {
-        overflow: visible;
-    }
+	svg {
+		overflow: visible;
+	}
 }
 
 .scroll-text {
-    position: absolute;
-    top: 0;
-    left: calc(50% - 150px);
+	position: absolute;
+	top: 200px;
+	width: 100%;
+	z-index: -1;
+
+	@include mq(desktop) {
+		top: 0;
+		right: 0px;
+		max-width: calc(100% * .4);
+		z-index: 1;
+	}
+    //left: calc(50% - 150px);
     //pointer-events: none;
 }
 
 .scroll-text__div {
-    max-width: 300px;
-    width: 100%;
-    @include mq(desktop) {
-        width: 620px;
-    }
-    margin-left: 0px;
-    background-color: #fff;
-    border: 2px solid #000;
-    box-shadow: 4px 4px 0 0 #767676;
+	width: 100%;
+	margin-left: 0px;
+	background-color: #fff;
+    //border: 2px solid #000;
+    //box-shadow: 4px 4px 0 0 #767676;
     padding: 6px 10px 0px;
     @include fs-headline(5);
     font-size: 20px;
@@ -148,20 +209,59 @@
 }
 
 .scroll-text__inner {
-    box-sizing: border-box;
-    height: 100vh;
-    position: relative;
-    z-index: 100;
 
-    .transparent-until-active & {
-        opacity: 0.25;
-        transition: opacity 0.5s ease-in-out;
+	.transparent-until-active & {
+		opacity: 0.25;
+		transition: opacity 0.5s ease-in-out;
+	}
+	//height: 30vh;
+
+	border-bottom: 1px solid #121212;
+
+   /*  border-top: 4px solid #f67676;
+    border-right: 1px solid #121212;
+    border-bottom: 1px solid #121212; */
+    min-height: 68px;
+    //padding-bottom: 20px;
+    //margin-bottom: 24px;
+    position: relative;
+
+    .date{
+    	position: absolute;
+    	width: 20px;
+    	font-size: 20px;
+    	line-height: 44px;
+    	font-family: "Guardian Titlepiece","Guardian Headline Full","Guardian Headline","Guardian Egyptian Web",Georgia,serif;
+    	font-weight: 700;
+    	font-variant-numeric: lining-nums;
+    	-webkit-font-feature-settings: "lnum";
+    	font-feature-settings: "lnum";
+    	top: 10px;
+    	line-height: 26px;
+    }
+    h3{
+    	font-size: 24px;
+    	line-height: 28px;
+    	font-family: "Guardian Headline","Guardian Egyptian Web","Guardian Headline Full",Georgia,serif;
+    	font-weight: 400;
+    	font-weight: 600;
+    	padding-left: 80px;
+    	padding-bottom: 2px;
+    	padding-right: 10px;
+    	padding-top: 2px;
+    	color: #121212;
     }
 
-    &:first-of-type {
-        .transparent-until-active & {
-            opacity: 1;
-        }
+    .paragraph{
+    	margin-bottom: 1rem;
+    	word-break: break-word;
+    	font-family: GuardianTextEgyptian,Guardian Text Egyptian Web,Georgia,serif;
+    	font-size: 1.0625rem;
+    	line-height: 1.5;
+    	font-weight: 400;
+    	color: #121212;
+    	padding-left: 80px;
+    	padding-right: 10px;
     }
 }
 
