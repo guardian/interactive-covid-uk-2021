@@ -117,9 +117,19 @@
 }
 
 .chart-data{
+	@include fs-headline(3);
 	position: absolute;
+	.date{position: relative;}
+	.ranking{position: relative;}
+	.deaths{position: absolute;color:#cc0a11;}
+	.vaccines{position: absolute;color:#056da1;}
+	.booster{position: absolute;color:#056da1;}
+}
 
-	@include fs-headline(5);
+.date-mark{
+	fill:none;
+	stroke:#333;
+	stroke-width:2px;
 }
 
 .scroll-wrapper {
@@ -216,7 +226,12 @@
 	}
 	//height: 30vh;
 
-	border-bottom: 1px solid #121212;
+	&:not(:last-child) {
+
+		border-bottom: 1px solid #121212;
+	}
+
+	
 
    /*  border-top: 4px solid #f67676;
     border-right: 1px solid #121212;

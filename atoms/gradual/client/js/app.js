@@ -7,13 +7,18 @@ const d3 = Object.assign({}, d3B);
 
 const atomEl = d3.select('.uk-covid-wrapper').node();
 const tooltip = d3.select('.chart-data');
+const date = tooltip.append('div').attr('class','tooltip-element date')
+const ranking = tooltip.append('div').attr('class','tooltip-element ranking')
+const deaths = tooltip.append('div').attr('class','tooltip-element deaths')
+const vaccines = tooltip.append('div').attr('class','tooltip-element vaccines')
+const booster = tooltip.append('div').attr('class','tooltip-element booster')
 
 const isMobile = window.top.matchMedia('(max-width: 600px)').matches;
 
 const width = isMobile ? atomEl.getBoundingClientRect().width : atomEl.getBoundingClientRect().width * .6;
 const height = isMobile ? window.top.innerHeight / 2 : window.top.innerHeight * .6;
 
-const margin = {left:25, top:height * .4, right:55, bottom:20}
+const margin = {left:25, top:50, right:55, bottom:20}
 
 const chart = d3.select('.uk-covid-wrapper')
 .append('svg')
@@ -60,6 +65,8 @@ let boostArea = lines.append('path').attr("class", "covid-area vaccines-area")
 let deathsLine = lines.append("path").attr("class", "covid-line deaths-line")
 let vaccinesLine = lines.append("path").attr("class", "covid-line vaccines-line")
 let boostLine = lines.append("path").attr("class", "covid-line boost-line")
+
+let mark = lines.append('path').attr('class', 'date-mark').attr('d', `M0,${margin.top},0,${height-margin.bottom}`)
 
 let maskArea = d3.select('#clip-mask').append('path').attr("class", "covid-area")
 
@@ -306,16 +313,23 @@ d3.json('https://interactive.guim.co.uk/docsdata-test/1XymBcR_xu0GwpGFsoICE22NH1
 			maskArea
 			.attr('d', deathsArea.attr('d') + vaccinesArea.attr('d'))
 
+
 			if(currentData.at(-1))
 			{
-				tooltip.html(`
-					${currentData.at(-1).date.format('MMM Do')}<br>
-					${currentData.at(-1).ranking}<br>
-					${currentData.at(-1).deaths}<br>
-					${currentData.at(-1).vaccines}<br>
-					${currentData.at(-1).booster}
-					`)
+
+				date.html(currentData.at(-1).date.format('MMM Do'))
+				ranking.html(currentData.at(-1).ranking)
+				ranking.style('color', colorScale(currentData.at(-1).stringency))
+				deaths.html(currentData.at(-1).deaths)
+				vaccines.html(currentData.at(-1).vaccines)
+				booster.html(currentData.at(-1).booster)
+				
 				tooltip.style('left', xScale(currentData.at(-1).date) + 'px')
+				deaths.style('top', yDeathsScale(currentData.at(-1).deaths) + 'px')
+				vaccines.style('top', yVaccinesScale(currentData.at(-1).vaccines) + 'px')
+				booster.style('top', yVaccinesScale(currentData.at(-1).booster) + 'px')
+
+				mark.style('transform', `translate(${xScale(currentData.at(-1).date)}px,0)`)
 
 				deathsDot
 				.attr('cx', xScale(currentData.at(-1).date))
@@ -331,14 +345,19 @@ d3.json('https://interactive.guim.co.uk/docsdata-test/1XymBcR_xu0GwpGFsoICE22NH1
 			}
 			else{
 
-				tooltip.html(`
-					${annotationDates[i].date.format('MMM Do')}<br>
-					${annotationDates[i].ranking}<br>
-					${annotationDates[i].deaths}<br>
-					${annotationDates[i].vaccines}<br>
-					${annotationDates[i].booster}
-					`)
-				tooltip.style('left',xScale(annotationDates[i].date) + 'px')
+				date.html(annotationDates[i].date.format('MMM Do'))
+				ranking.html(annotationDates[i].ranking)
+				ranking.style('color', colorScale(annotationDates[i].stringency))
+				deaths.html(annotationDates[i].deaths)
+				vaccines.html(annotationDates[i].vaccines)
+				booster.html(annotationDates[i].booster)
+
+				mark.style('transform', `translate(${xScale(annotationDates[i].date)}px,0)`)
+				
+				tooltip.style('left', xScale(annotationDates[i].date) + 'px')
+				deaths.style('top', yDeathsScale(annotationDates[i].deaths) + 'px')
+				vaccines.style('top', yVaccinesScale(annotationDates[i].vaccines) + 'px')
+				booster.style('top', yVaccinesScale(annotationDates[i].booster) + 'px')
 
 				deathsDot
 				.attr('cx', xScale(annotationDates[i].date))
