@@ -22,9 +22,10 @@
 	}
 }
 
-.uk-covid-wrapper{
+.svg-wrapper{
 	position: relative;
 	width: 100%;
+	height:100%;
 }
 
 .covid-line, .deaths-line, .boost-line{
@@ -94,10 +95,26 @@
 	@include fs-textSans(1);
 	text{
 		fill:#cc0a11;
+		font-weight: bold;
 	}
 
-	.tick{
+	/* .tick{
 		line{stroke:white;opacity: .5;}
+	} */
+
+	line{
+		stroke:#cc0a11;
+		stroke-width:2px;
+	}
+
+	.white-line{
+		stroke:white;
+		stroke-width:1px;
+		opacity: .5;
+	}
+
+	.tick:last-child{
+		display: none;
 	}
 }
 
@@ -105,10 +122,20 @@
 	@include fs-textSans(1);
 	text{
 		fill:#056da1;
+		font-weight: bold;
 	}
 
-	.tick{
+	line{
+		stroke:#056da1;
+		stroke-width:2px;
+	}
+
+	/* .tick{
 		line{display: none;}
+	} */
+
+	.tick:last-child{
+		display: none;
 	}
 }
 
@@ -117,9 +144,17 @@
 }
 
 .chart-data{
-	@include fs-headline(3);
 	position: absolute;
-	.date{position: relative;}
+	top:0;
+	.date{
+		position: relative;
+    	width: 20px;
+    	font-size: 20px;
+    	font-family: "Guardian Titlepiece","Guardian Headline Full","Guardian Headline","Guardian Egyptian Web",Georgia,serif;
+    	font-weight: 700;
+    	font-feature-settings: "lnum";
+    	
+	}
 	.ranking{position: relative;}
 	.deaths{position: absolute;color:#cc0a11;}
 	.vaccines{position: absolute;color:#056da1;}
@@ -130,7 +165,45 @@
 	fill:none;
 	stroke:#333;
 	stroke-width:2px;
+	stroke-linecap: 'round';
+	stroke-dasharray:"4 1" ;
 }
+
+.date-bullet{
+	background: white;
+	transition: 0.25s linear;
+	position: absolute;
+    height: 16px;
+    width: 16px;
+    border-radius: 50%;
+    transform: translate(-8px, -56%);
+    border: 1px solid #333;
+
+    &.active{
+    	background:#121212;
+    	height: 20px;
+    	width: 20px;
+    	transform: translate(-10px, -56%);
+    }
+}
+
+.timeline-img-wrapper{
+	width: 100%;
+	padding-bottom: 50%;
+	position: relative;
+	border-bottom: 1px solid #f67676;
+
+	.timeline-img{
+		position: absolute;
+		left: 0;
+		right: 0;
+		bottom: 0;
+		top: 0;
+		background-size: cover;
+	}
+}
+
+
 
 .scroll-wrapper {
 	@include mq(tablet) {
@@ -190,9 +263,17 @@
 
 .scroll-text {
 	position: absolute;
-	top: 200px;
 	width: 100%;
 	z-index: -1;
+	
+	.scroll-text__inner:not(:last-child){
+
+		border-left: 1px solid #bababa;
+	}
+	
+	@include mq(mobile) {
+		top:calc(50vh + 12px);
+	}
 
 	@include mq(desktop) {
 		top: 0;
@@ -200,22 +281,33 @@
 		max-width: calc(100% * .4);
 		z-index: 1;
 	}
-    //left: calc(50% - 150px);
-    //pointer-events: none;
 }
+
+
 
 .scroll-text__div {
 	width: 100%;
-	margin-left: 0px;
+	margin-left: 1px;
 	background-color: #fff;
-    //border: 2px solid #000;
-    //box-shadow: 4px 4px 0 0 #767676;
     padding: 6px 10px 0px;
     @include fs-headline(5);
     font-size: 20px;
     line-height: 26px;
     padding-top: 4px;
     padding-bottom: 0px;
+
+    h3{
+    	font-size: 24px;
+    	line-height: 32.81px;
+    	font-family: "Guardian Headline","Guardian Egyptian Web","Guardian Headline Full",Georgia,serif;
+    	font-weight: 400;
+    	font-weight: 600;
+    	padding-left: 80px;
+    	padding-bottom: 2px;
+    	padding-right: 10px;
+    	padding-top: 2px;
+    	color: #121212;
+    }
 }
 
 .scroll-text__inner {
@@ -224,21 +316,8 @@
 		opacity: 0.25;
 		transition: opacity 0.5s ease-in-out;
 	}
-	//height: 30vh;
-
-	&:not(:last-child) {
-
-		border-bottom: 1px solid #121212;
-	}
-
-	
-
-   /*  border-top: 4px solid #f67676;
-    border-right: 1px solid #121212;
-    border-bottom: 1px solid #121212; */
-    min-height: 68px;
-    //padding-bottom: 20px;
-    //margin-bottom: 24px;
+	border-top: 1px solid #121212;
+	padding-bottom: 24px;
     position: relative;
 
     .date{
@@ -254,21 +333,9 @@
     	top: 10px;
     	line-height: 26px;
     }
-    h3{
-    	font-size: 24px;
-    	line-height: 28px;
-    	font-family: "Guardian Headline","Guardian Egyptian Web","Guardian Headline Full",Georgia,serif;
-    	font-weight: 400;
-    	font-weight: 600;
-    	padding-left: 80px;
-    	padding-bottom: 2px;
-    	padding-right: 10px;
-    	padding-top: 2px;
-    	color: #121212;
-    }
+    
 
     .paragraph{
-    	margin-bottom: 1rem;
     	word-break: break-word;
     	font-family: GuardianTextEgyptian,Guardian Text Egyptian Web,Georgia,serif;
     	font-size: 1.0625rem;
@@ -277,7 +344,14 @@
     	color: #121212;
     	padding-left: 80px;
     	padding-right: 10px;
+    	margin: 0;
     }
 }
+
+.gv-main-video{
+width: 456px;
+display: block;
+}
+
 
 

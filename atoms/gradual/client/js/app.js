@@ -1,11 +1,14 @@
 import * as d3B from 'd3'
-import { numberWithCommas, round } from 'shared/js/util'
+import { $, $$, numberWithCommas, round } from 'shared/js/util'
 import ScrollyTeller from "shared/js/ScrollyTellerProgress";
 import moment from 'moment'
+import data from 'assets/json/data.json'
+
+console.log("<%= path %>/media/april-13.jpg")
 
 const d3 = Object.assign({}, d3B);
 
-const atomEl = d3.select('.uk-covid-wrapper').node();
+const atomEl = d3.select('.svg-wrapper').node();
 const tooltip = d3.select('.chart-data');
 const date = tooltip.append('div').attr('class','tooltip-element date')
 const ranking = tooltip.append('div').attr('class','tooltip-element ranking')
@@ -13,14 +16,15 @@ const deaths = tooltip.append('div').attr('class','tooltip-element deaths')
 const vaccines = tooltip.append('div').attr('class','tooltip-element vaccines')
 const booster = tooltip.append('div').attr('class','tooltip-element booster')
 
-const isMobile = window.top.matchMedia('(max-width: 600px)').matches;
+const isMobile = window.matchMedia('(max-width: 600px)').matches;
 
 const width = isMobile ? atomEl.getBoundingClientRect().width : atomEl.getBoundingClientRect().width * .6;
-const height = isMobile ? window.top.innerHeight / 2 : window.top.innerHeight * .6;
+const wHeight = Math.max(document.documentElement.clientHeight || 0, window.innerHeight || 0)
+const height = isMobile ? wHeight / 2 : wHeight * .6;
 
-const margin = {left:25, top:50, right:55, bottom:20}
+const margin = {left:45, top:50, right:55, bottom:20}
 
-const chart = d3.select('.uk-covid-wrapper')
+const chart = d3.select('.svg-wrapper')
 .append('svg')
 .attr('id', 'covid-uk-chart')
 .attr('width', width)
@@ -57,7 +61,6 @@ const areas = chart.append('g')
 const lines = chart.append('g')
 const dots = chart.append('g')
 
-
 let deathsArea = lines.append('path').attr("class", "covid-area deaths-area")
 let vaccinesArea = lines.append('path').attr("class", "covid-area vaccines-area")
 let boostArea = lines.append('path').attr("class", "covid-area vaccines-area")
@@ -66,329 +69,337 @@ let deathsLine = lines.append("path").attr("class", "covid-line deaths-line")
 let vaccinesLine = lines.append("path").attr("class", "covid-line vaccines-line")
 let boostLine = lines.append("path").attr("class", "covid-line boost-line")
 
-let mark = lines.append('path').attr('class', 'date-mark').attr('d', `M0,${margin.top},0,${height-margin.bottom}`)
+let mark = lines.append('path').attr('class', 'date-mark').attr('d', `M${margin.left},${margin.top},${margin.left},${height-margin.bottom}`)
 
 let maskArea = d3.select('#clip-mask').append('path').attr("class", "covid-area")
 
-d3.json('https://interactive.guim.co.uk/docsdata-test/1XymBcR_xu0GwpGFsoICE22NH1o_beJ5BiINB6NS6fLg.json')
-.then(rawdata => {
+let deathsDot = dots.append('circle')
+let vaccinesDot = dots.append('circle')
+let boostDot = dots.append('circle')
 
-	const data = rawdata.sheets['master-data'];
+const xScale =  d3.scaleTime();
+const yDeathsScale = d3.scaleLinear();
+const yVaccinesScale = d3.scaleLinear();
 
-	const dates = data.map(d => moment(d.Day, 'DD/MM/YYYY'))
+const dates = data.map(d => moment(d.Day, 'DD/MM/YYYY'))
 
-	const dataObj = data.map(d => {
+const dataObj = data.map(d => {
 
-		let index = +d.stringency_index == 0 ? null : +d.stringency_index;
+	let index = +d.stringency_index == 0 ? null : +d.stringency_index;
 
-		return {date:moment(d.Day, 'DD/MM/YYYY'), deaths:+d.cum_deaths, vaccines:+d.fully_vaccinated_rate, booster:+d.booster_rate, stringency:+d.stringency_index, ranking:d.stringency_ranking, title:d.annotation_title, text:d.annotation_text}
-		
-	});
+	return {date:moment(d.Day, 'DD/MM/YYYY'), deaths:+d.cum_deaths, vaccines:+d.fully_vaccinated_rate, booster:+d.booster_rate, stringency:+d.stringency_index, ranking:d.stringency_ranking, title:d.annotation_title, text:d.annotation_text}
 
-	let stringency = {date:dataObj[0].date, stringency:dataObj[0].stringency};
+});
 
-	linearGradient.append('stop')
-	.attr('offset', '0%')
-	.style('stop-color',colorScale(stringency.stringency))
+let stringency = {date:dataObj[0].date, stringency:dataObj[0].stringency};
 
-	const stringencyDates = dataObj.map((d,i) => {
+linearGradient.append('stop')
+.attr('offset', '0%')
+.style('stop-color',colorScale(stringency.stringency))
 
-		if(d.stringency != stringency.stringency){
+const stringencyDates = dataObj.map((d,i) => {
 
-			console.log(stringency.stringency , d.stringency, d.date.format('DD/MM/YYYY'))
+	if(d.stringency != stringency.stringency){
 
-			linearGradient.append('stop')
-			.attr('offset', 0.27397260274 * i + '%')
-			.style('stop-color',colorScale(stringency.stringency))
+		linearGradient.append('stop')
+		.attr('offset', 0.27397260274 * i + '%')
+		.style('stop-color',colorScale(stringency.stringency))
 
-			stringency = {date:d.date, stringency:d.stringency};
+		stringency = {date:d.date, stringency:d.stringency};
 
-			linearGradient.append('stop')
-			.attr('offset', 0.27397260274 * i + '%')
-			.style('stop-color',colorScale(d.stringency))
-		}
-	})
+		linearGradient.append('stop')
+		.attr('offset', 0.27397260274 * i + '%')
+		.style('stop-color',colorScale(d.stringency))
+	}
+})
 
-	const annotationDates = dataObj.filter(d => d.text != '')
+const annotationDates = dataObj.filter(d => d.text != '')
 
-	annotationDates.forEach((d,i) => {
+const datesExtent = d3.extent(dataObj, d => d.date);
 
-		if(d.text != '')
-		{
+const rollingDeathsExtent = d3.extent(dataObj.map(d => +d.deaths))
 
-			let blob = d3.select('.scroll-text')
-			.append('div')
-			.attr('class', 'scroll-text__inner')
-			.style('height', height + 'px')
-			
-			let div = blob.append('div')
-			.attr('class','scroll-text__div')
+const fullyVaccinatedExtent = d3.extent(dataObj.map(d => +d.vaccines))
 
-			div
-			.append('p')
-			.attr('class','date')
-			.html(d.date.format('MMM Do'))
-			
-			div
-			.append('h3')
-			.html(d.title)
+xScale
+.range([margin.left, width - margin.right])
+.domain(datesExtent)
 
-			div
-			.append('p')
-			.attr('class','paragraph')
-			.html(d.text)
+yDeathsScale
+.range([margin.top, height - margin.bottom])
+.domain([d3.max(rollingDeathsExtent), 0])
 
-		}
-	})
+yVaccinesScale
+.range([margin.top, height - margin.bottom])
+.domain([d3.max(fullyVaccinatedExtent), 0])
 
+const line = d3.line()
+.curve(d3.curveLinear)
+.x(d => xScale(d.date))
 
-	const datesExtent = d3.extent(dataObj, d => d.date);
+const area = d3.area()
+.curve(d3.curveLinear)
+.x(line.x())
+.y0(yVaccinesScale(0))
+.y1(line.y())
 
-	const rollingDeathsExtent = d3.extent(dataObj.map(d => +d.deaths))
+let xaxis = axis.append("g")
+.attr("transform", "translate(0," + (height - margin.bottom) + ")")
+.attr("class", "xaxis")
+.call(
+	d3.axisBottom(xScale)
+	.ticks(12)
+	.tickFormat(d3.timeFormat("%b"))
 
-	const fullyVaccinatedExtent = d3.extent(dataObj.map(d => +d.vaccines))
+	)
+.selectAll("text")
 
-	const xScale =  d3.scaleTime()
-	.range([margin.left, width - margin.right])
-	.domain(datesExtent)
+let leftAxis = axis.append("g")
+.attr("class", "leftAxis")
+.attr("transform", `translate(${margin.left},0)`)
+.call(
+	d3.axisLeft(yDeathsScale)
+	.ticks(4)
+	.tickSizeInner(margin.left)
+	)
+.selectAll("text")
+.text(d => (+d).toLocaleString('en-GB',{maximumFractionDigits: 0}))
+.style('text-anchor', 'start')
+.attr('dy','-10px')
+.attr('dx','5px')
 
-	const yDeathsScale = d3.scaleLinear()
-	.range([margin.top, height - margin.bottom])
-	.domain([d3.max(rollingDeathsExtent), 0])
+d3.selectAll(".leftAxis .tick")
+.append('line')
+.attr('x2', width - margin.left - margin.right)
+.attr('class', 'white-line')
 
-	const yVaccinesScale = d3.scaleLinear()
-	.range([margin.top, height - margin.bottom])
-	.domain([d3.max(fullyVaccinatedExtent), 0])
-
-	const line = d3.line()
-	.curve(d3.curveLinear)
-	.x(d => xScale(d.date))
-
-	const area = d3.area()
-	.curve(d3.curveLinear)
-	.x(line.x())
-	.y0(yVaccinesScale(0))
-	.y1(line.y())
-	
-	let xaxis = axis.append("g")
-	.attr("transform", "translate(0," + (height - margin.bottom) + ")")
-	.attr("class", "xaxis")
-	.call(
-		d3.axisBottom(xScale)
-		.ticks(12)
-		.tickFormat(d3.timeFormat("%b"))
-
-		)
-	.selectAll("text")
-
-	let leftAxis = axis.append("g")
-	.attr("class", "leftAxis")
-	.attr("transform", `translate(${margin.left},0)`)
-	.call(
-		d3.axisLeft(yDeathsScale)
-		.ticks(4)
-		.tickSizeInner(-width + margin.right)
-		)
-	.selectAll("text")
-	.text(d => (+d).toLocaleString('en-GB',{maximumFractionDigits: 0}))
-
-	let rightAxis = axis.append("g")
-	.attr("class", "rightAxis")
-	.attr("transform", `translate(${width - margin.right},0)`)
-	.call(
-		d3.axisRight(yVaccinesScale)
-		.ticks(4)
-		)
-	.selectAll("text")
-	.text(d => (+d).toLocaleString('en-GB',{maximumFractionDigits: 0}))
-
-	let deathsDot = dots.append('circle')
-	.attr('r', 6)
-	.attr('cx', xScale(dataObj[0].date))
-	.attr('cy', yDeathsScale(dataObj[0].deaths))
-	.attr('class', 'deaths-dot')
-
-	let vaccinesDot = dots.append('circle')
-	.attr('r', 6)
-	.attr('cx', xScale(dataObj[0].date))
-	.attr('cy', yVaccinesScale(dataObj[0].vaccines))
-	.attr('class', 'vaccines-dot')
-
-	let boostDot = dots.append('circle')
-	.attr('r', 6)
-	.attr('cx', xScale(dataObj[0].date))
-	.attr('cy', yVaccinesScale(dataObj[0].booster))
-	.attr('class', 'boost-dot')
-
-	let deathsLabel = dots.append('text')
-	.attr('cx', xScale(dataObj[0].date))
-	.attr('cy', yDeathsScale(dataObj[0].deaths))
-	.attr('class', 'deaths-text')
-
-	let vaccinesLabel = dots.append('text')
-	.attr('cx', xScale(dataObj[0].date))
-	.attr('cy', yVaccinesScale(dataObj[0].vaccines))
-	.attr('class', 'vaccines-text')
+/*d3.selectAll(".rightAxis .tick")
+.append('line')
+.attr('x2', -margin.left)*/
 
 
-	const scrolly = new ScrollyTeller({
-		parent: document.querySelector("#gv-scrolly-1"),
-	    triggerTop: 0.01/*(height / 2) / window.top.innerHeight */, // percentage from the top of the screen that the trigger should fire
-	    triggerTopMobile: 0.75,
-	    transparentUntilActive: true,
+let rightAxis = axis.append("g")
+.attr("class", "rightAxis")
+.attr("transform", `translate(${width - margin.right},0)`)
+.call(
+	d3.axisRight(yVaccinesScale)
+	.ticks(4)
+	.tickSizeInner(10)
+	)
+.selectAll("text")
+.text(d => (+d).toLocaleString('en-GB',{maximumFractionDigits: 0}))
+.attr('dy','-10px')
+.attr('dx','-15px')
+
+
+
+deathsDot
+.attr('r', 6)
+.attr('cx', xScale(dataObj[0].date))
+.attr('cy', yDeathsScale(dataObj[0].deaths))
+.attr('class', 'deaths-dot')
+
+vaccinesDot
+.attr('r', 6)
+.attr('cx', xScale(dataObj[0].date))
+.attr('cy', yVaccinesScale(dataObj[0].vaccines))
+.attr('class', 'vaccines-dot')
+
+boostDot
+.attr('r', 6)
+.attr('cx', xScale(dataObj[0].date))
+.attr('cy', yVaccinesScale(dataObj[0].booster))
+.attr('class', 'boost-dot')
+
+const scrolly = new ScrollyTeller({
+	parent: document.querySelector("#gv-scrolly-1"),
+	    triggerTop: 0.05, // percentage from the top of the screen that the trigger should fire
+	    triggerTopMobile:.57,
+	    transparentUntilActive: false,
 	    overall: () => {}
 	})
 
-	//let prevHeight = +d3.select('.scroll-wrapper').style('height').split('px')[0];
+let oldHeight = d3.select('.scroll-wrapper').node().getBoundingClientRect().height;
 
-	//d3.select('.scroll-wrapper').style('height', prevHeight + window.top.innerHeight + 'px')
+d3.select('.scroll-wrapper').style('height', oldHeight + height + 'px')
 
-	scrolly.gradual( (progressInBox, i, abs, total) => {
+let currentBlob = -1;
 
-		try{
+scrolly.gradual( (progressInBox, i, abs, total) => {
 
-			const pointA = annotationDates[i].date;
-			const pointB = annotationDates[i+1] != undefined ? annotationDates[i+1].date : annotationDates[i].date;
+	console.log(i)
 
-			const spanData = dataObj.filter(f => f.date >= pointA && f.date < pointB)
-			const datePos = parseInt((progressInBox * 100) * spanData.length / 100)
-			const currentData = spanData.splice(0,datePos)
-			const dataTillCurrent = dataObj.filter(f => f.date <= pointA)
+	if(currentBlob != i)
+	{
+		d3.selectAll('.scroll-text__inner .date-bullet')
+		.classed('active', false)
 
-			const allData = dataTillCurrent.concat(currentData)
+		d3.select('.blob-' + i + ' .date-bullet')
+		.classed('active', true)
 
-			deathsLine
-			.attr("d", () => {
-				line.y(d => yDeathsScale(d.deaths))
-				line.defined(d => d.deaths)
-
-				return line(allData)
-			})
-
-			deathsArea
-			.attr("d", () => {
-				area.y1(line.y())
-				area.defined(line.defined())
-
-				return area(allData)
-			})
-
-			vaccinesLine
-			.attr("d", () => {
-				line.y(d => yVaccinesScale(d.vaccines))
-				line.defined(d => d.vaccines)
-
-				return line(allData)
-			})
-
-			vaccinesArea
-			.attr("class", "covid-area vaccines-area")
-			.attr("d", () => {
-
-				area.y1(line.y())
-				area.defined(line.defined())
-
-				return area(allData)
-			});
-
-			boostLine
-			.attr("d", () => {
-
-				line.y(d => yVaccinesScale(d.booster))
-				line.defined(d => d.booster)
-
-				return line(allData)
-			})
-
-			boostArea
-			.attr("class", "covid-area boost-area")
-			.attr("d", () => {
-
-				area.y1(line.y())
-				area.defined(line.defined())
-
-				return area(allData)
-			});
- 
-			maskArea
-			.attr('d', deathsArea.attr('d') + vaccinesArea.attr('d'))
+		currentBlob = i;
+	}
 
 
-			if(currentData.at(-1))
-			{
+	try{
 
-				date.html(currentData.at(-1).date.format('MMM Do'))
-				ranking.html(currentData.at(-1).ranking)
-				ranking.style('color', colorScale(currentData.at(-1).stringency))
-				deaths.html(currentData.at(-1).deaths)
-				vaccines.html(currentData.at(-1).vaccines)
-				booster.html(currentData.at(-1).booster)
-				
-				tooltip.style('left', xScale(currentData.at(-1).date) + 'px')
-				deaths.style('top', yDeathsScale(currentData.at(-1).deaths) + 'px')
-				vaccines.style('top', yVaccinesScale(currentData.at(-1).vaccines) + 'px')
-				booster.style('top', yVaccinesScale(currentData.at(-1).booster) + 'px')
+		const pointA = annotationDates[i].date;
+		const pointB = annotationDates[i+1] != undefined ? annotationDates[i+1].date : annotationDates[i].date;
 
-				mark.style('transform', `translate(${xScale(currentData.at(-1).date)}px,0)`)
+		const spanData = dataObj.filter(f => f.date >= pointA && f.date < pointB)
+		const datePos = parseInt((progressInBox * 100) * spanData.length / 100)
+		const currentData = spanData.splice(0,datePos)
+		const dataTillCurrent = dataObj.filter(f => f.date <= pointA)
 
-				deathsDot
-				.attr('cx', xScale(currentData.at(-1).date))
-				.attr('cy', yDeathsScale(currentData.at(-1).deaths))
+		const allData = dataTillCurrent.concat(currentData)
 
-				vaccinesDot
-				.attr('cx', xScale(currentData[currentData.length-1].date))
-				.attr('cy', yVaccinesScale(currentData[currentData.length-1].vaccines))
+		deathsLine
+		.attr("d", () => {
+			line.y(d => yDeathsScale(d.deaths))
+			line.defined(d => d.deaths)
 
-				boostDot
-				.attr('cx', xScale(currentData[currentData.length-1].date))
-				.attr('cy', yVaccinesScale(currentData[currentData.length-1].booster))
-			}
-			else{
+			return line(allData)
+		})
 
-				date.html(annotationDates[i].date.format('MMM Do'))
-				ranking.html(annotationDates[i].ranking)
-				ranking.style('color', colorScale(annotationDates[i].stringency))
-				deaths.html(annotationDates[i].deaths)
-				vaccines.html(annotationDates[i].vaccines)
-				booster.html(annotationDates[i].booster)
+		deathsArea
+		.attr("d", () => {
+			area.y1(line.y())
+			area.defined(line.defined())
 
-				mark.style('transform', `translate(${xScale(annotationDates[i].date)}px,0)`)
-				
-				tooltip.style('left', xScale(annotationDates[i].date) + 'px')
-				deaths.style('top', yDeathsScale(annotationDates[i].deaths) + 'px')
-				vaccines.style('top', yVaccinesScale(annotationDates[i].vaccines) + 'px')
-				booster.style('top', yVaccinesScale(annotationDates[i].booster) + 'px')
+			return area(allData)
+		})
 
-				deathsDot
-				.attr('cx', xScale(annotationDates[i].date))
-				.attr('cy', yDeathsScale(annotationDates[i].deaths))
+		vaccinesLine
+		.attr("d", () => {
+			line.y(d => yVaccinesScale(d.vaccines))
+			line.defined(d => d.vaccines)
 
-				vaccinesDot
-				.attr('cx', xScale(annotationDates[i].date))
-				.attr('cy', yVaccinesScale(annotationDates[i].vaccines))
+			return line(allData)
+		})
 
-				boostDot
-				.attr('cx', xScale(annotationDates[i].date))
-				.attr('cy', yVaccinesScale(annotationDates[i].booster))
-			}
+		vaccinesArea
+		.attr("class", "covid-area vaccines-area")
+		.attr("d", () => {
 
-			
+			area.y1(line.y())
+			area.defined(line.defined())
 
+			return area(allData)
+		});
+
+		boostLine
+		.attr("d", () => {
+
+			line.y(d => yVaccinesScale(d.booster))
+			line.defined(d => d.booster)
+
+			return line(allData)
+		})
+
+		boostArea
+		.attr("class", "covid-area boost-area")
+		.attr("d", () => {
+
+			area.y1(line.y())
+			area.defined(line.defined())
+
+			return area(allData)
+		});
+
+		if(deathsArea.attr('d') && vaccinesArea.attr('d'))
+		{
+			maskArea.attr('d', deathsArea.attr('d') + vaccinesArea.attr('d'))
 		}
-		catch (err){
+		else
+		{
+			maskArea.attr('d', deathsArea.attr('d'))
+		}
 
-			console.log(err)
+
+
+
+		if(currentData[currentData.length-1])
+		{
+			manageTooltip(currentData[currentData.length-1])
+		}
+		else{
+
+			manageTooltip(annotationDates[i])
+		}
+	}
+	catch (err){
+
+			//console.log(err)
 
 		}
 
 
 	})
 
-
-	scrolly.watchScroll();
-
-})
-
+scrolly.watchScroll();
 
 
 //_____________HELPERSS________________
+
+
+const manageTooltip = (data) => {
+
+	date.html(data.date.format('MMM Do'))
+	ranking.html(data.ranking)
+	ranking.style('color', colorScale(data.stringency))
+	deaths.html(data.deaths)
+	vaccines.html(data.vaccines)
+	booster.html(data.booster)
+
+	tooltip.style('left', xScale(data.date) + 'px')
+	deaths.style('top', yDeathsScale(data.deaths) + 'px')
+	vaccines.style('top', yVaccinesScale(data.vaccines) + 'px')
+	booster.style('top', yVaccinesScale(data.booster) + 'px')
+
+	mark.style('transform', `translate(${xScale(data.date) - margin.left}px,0)`)
+
+	deathsDot
+	.attr('cx', xScale(data.date))
+	.attr('cy', yDeathsScale(data.deaths))
+
+	vaccinesDot
+	.attr('cx', xScale(data.date))
+	.attr('cy', yVaccinesScale(data.vaccines))
+
+	boostDot
+	.attr('cx', xScale(data.date))
+	.attr('cy', yVaccinesScale(data.booster))
+}
+
+const dodge = (V, separation, maxiter = 10, maxerror = 1e-1) => {
+
+	const n = V.length;
+
+	if (!V.every(isFinite)) throw new Error("invalid position");
+
+	if (!(n > 1)) return V;
+
+	let I = d3.range(V.length);
+
+	for (let iter = 0; iter < maxiter; ++iter) {
+
+		I.sort((i, j) => d3.ascending(V[i], V[j]));
+
+		let error = 0;
+
+		for (let i = 1; i < n; ++i) {
+
+			let delta = V[I[i]] - V[I[i - 1]];
+
+			if (delta < separation) {
+				delta = (separation - delta) / 2;
+				error = Math.max(error, delta);
+				V[I[i - 1]] -= delta;
+				V[I[i]] += delta;
+			}
+
+		}
+		if (error < maxerror) break;
+	}
+	return V;
+}
