@@ -10,19 +10,19 @@ const d3 = Object.assign({}, d3B);
 
 const atomEl = d3.select('.svg-wrapper').node();
 const tooltip = d3.select('.chart-data');
-const date = tooltip.append('div').attr('class','tooltip-element date')
-const ranking = tooltip.append('div').attr('class','tooltip-element ranking')
-const deaths = tooltip.append('div').attr('class','tooltip-element deaths')
-const vaccines = tooltip.append('div').attr('class','tooltip-element vaccines')
-const booster = tooltip.append('div').attr('class','tooltip-element booster')
+const date = d3.select('.date');
+const ranking = d3.select('.ranking');
+const deaths = d3.select('.deaths');
+const vaccines = d3.select('.vaccines');
+const booster = d3.select('.booster');
 
 const isMobile = window.matchMedia('(max-width: 600px)').matches;
 
-const width = isMobile ? atomEl.getBoundingClientRect().width : atomEl.getBoundingClientRect().width * .6;
+const width = isMobile ? atomEl.getBoundingClientRect().width : atomEl.getBoundingClientRect().width - 434;
 const wHeight = Math.max(document.documentElement.clientHeight || 0, window.innerHeight || 0)
 const height = isMobile ? wHeight / 2 : wHeight * .6;
 
-const margin = {left:45, top:50, right:55, bottom:20}
+const margin = {left:45, top:80, right:isMobile ? 60 : 70, bottom:20}
 
 const chart = d3.select('.svg-wrapper')
 .append('svg')
@@ -163,10 +163,28 @@ let leftAxis = axis.append("g")
 	.tickSizeInner(margin.left)
 	)
 .selectAll("text")
-.text(d => (+d).toLocaleString('en-GB',{maximumFractionDigits: 0}))
+.text(d => numberWithCommas(d))
 .style('text-anchor', 'start')
-.attr('dy','-10px')
+.attr('class', (d,i) => 'left-label-' + i)
+.attr('dy',(d,i) => '-10px')
 .attr('dx','5px')
+.call(t => {
+
+	t.each((d,i) => {
+	
+		if(i == 0){
+			let label = d3.select('.left-label-0')
+			.text(numberWithCommas(d))
+			.append("tspan")
+			.text('Deaths')
+			.attr("x", "-43px")
+
+	        label.attr("dy","-1.5em")
+		}
+		
+	})
+})
+
 
 d3.selectAll(".leftAxis .tick")
 .append('line')
@@ -187,9 +205,26 @@ let rightAxis = axis.append("g")
 	.tickSizeInner(10)
 	)
 .selectAll("text")
-.text(d => (+d).toLocaleString('en-GB',{maximumFractionDigits: 0}))
+.text(d => d)
+.attr('class', (d,i) => 'right-label-' + i)
 .attr('dy','-10px')
 .attr('dx','-15px')
+.call(t => {
+
+	t.each((d,i) => {
+	
+		if(i == 0){
+			let label = d3.select('.right-label-0')
+			.text(d+'%')
+			.append("tspan")
+			.text('Vaccination')
+			.attr("x", "-2px")
+
+	        label.attr("dy","-1.5em")
+		}
+		
+	})
+})
 
 
 
@@ -213,8 +248,8 @@ boostDot
 
 const scrolly = new ScrollyTeller({
 	parent: document.querySelector("#gv-scrolly-1"),
-	    triggerTop: 0.05, // percentage from the top of the screen that the trigger should fire
-	    triggerTopMobile:.57,
+	    triggerTop: 0.03, // percentage from the top of the screen that the trigger should fire
+	    triggerTopMobile:.54,
 	    transparentUntilActive: false,
 	    overall: () => {}
 	})
@@ -226,8 +261,6 @@ d3.select('.scroll-wrapper').style('height', oldHeight + height + 'px')
 let currentBlob = -1;
 
 scrolly.gradual( (progressInBox, i, abs, total) => {
-
-	console.log(i)
 
 	if(currentBlob != i)
 	{
@@ -347,7 +380,7 @@ const manageTooltip = (data) => {
 	date.html(data.date.format('MMM Do'))
 	ranking.html(data.ranking)
 	ranking.style('color', colorScale(data.stringency))
-	deaths.html(data.deaths)
+	deaths.html(numberWithCommas(data.deaths))
 	vaccines.html(data.vaccines)
 	booster.html(data.booster)
 

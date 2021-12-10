@@ -146,14 +146,12 @@
 .chart-data{
 	position: absolute;
 	top:0;
+	@include fs-titlepiece(1);
+	font-weight: 700;
+	font-size: 20px;
 	.date{
+		margin-top: 14px;
 		position: relative;
-    	width: 20px;
-    	font-size: 20px;
-    	font-family: "Guardian Titlepiece","Guardian Headline Full","Guardian Headline","Guardian Egyptian Web",Georgia,serif;
-    	font-weight: 700;
-    	font-feature-settings: "lnum";
-    	
 	}
 	.ranking{position: relative;}
 	.deaths{position: absolute;color:#cc0a11;}
@@ -173,25 +171,35 @@
 	background: white;
 	transition: 0.25s linear;
 	position: absolute;
-    height: 16px;
-    width: 16px;
-    border-radius: 50%;
-    transform: translate(-8px, -56%);
-    border: 1px solid #333;
+	height: 16px;
+	width: 16px;
+	border-radius: 50%;
+	transform: translate(-8px, -56%);
+	border: 1px solid #333;
+	z-index: 1;
 
-    &.active{
-    	background:#121212;
-    	height: 20px;
-    	width: 20px;
-    	transform: translate(-10px, -56%);
-    }
+	&.active{
+		background:#121212;
+		height: 20px;
+		width: 20px;
+		transform: translate(-12px, -56%);
+		border:4px solid white;
+		height: 24px;
+		width: 24px;
+	}
+
+	@include mq(mobile) {
+		display: none;
+	}
+	@include mq(desktop) {
+		display: block;
+	}
 }
 
 .timeline-img-wrapper{
 	width: 100%;
 	padding-bottom: 50%;
 	position: relative;
-	border-bottom: 1px solid #f67676;
 
 	.timeline-img{
 		position: absolute;
@@ -206,6 +214,7 @@
 
 
 .scroll-wrapper {
+
 	@include mq(tablet) {
 		width: 740px;
 	}
@@ -239,6 +248,27 @@
 	height: auto;
 	max-height: 100vh;
 	background: white;
+	padding-bottom: 8px;
+
+	&:before {
+		content: "";
+		position: absolute;
+		top: 9px;
+		border-top: 4px solid #8CCAFB;
+		width: calc(100% - 434px);
+	}
+
+
+
+
+	@include mq(mobile) {
+		border-bottom: 4px solid #8CCAFB;
+	}
+
+	@include mq(desktop) {
+		border-bottom: 0px;
+	}
+	
 
 	&.fixed-top {
 		position: fixed;
@@ -263,22 +293,20 @@
 
 .scroll-text {
 	position: absolute;
-	width: 100%;
 	z-index: -1;
-	
-	.scroll-text__inner:not(:last-child){
-
-		border-left: 1px solid #bababa;
-	}
+	width: calc(100% - 10px);
+	margin-left:9px;
 	
 	@include mq(mobile) {
 		top:calc(50vh + 12px);
+		margin-left:0;
+		width: 100%;
 	}
 
 	@include mq(desktop) {
-		top: 0;
+		top: 8px;
 		right: 0px;
-		max-width: calc(100% * .4);
+		max-width: 434px;
 		z-index: 1;
 	}
 }
@@ -287,27 +315,15 @@
 
 .scroll-text__div {
 	width: 100%;
-	margin-left: 1px;
+	max-width: 434px;
 	background-color: #fff;
-    padding: 6px 10px 0px;
-    @include fs-headline(5);
-    font-size: 20px;
-    line-height: 26px;
-    padding-top: 4px;
-    padding-bottom: 0px;
+	@include fs-headline(5);
 
-    h3{
-    	font-size: 24px;
-    	line-height: 32.81px;
-    	font-family: "Guardian Headline","Guardian Egyptian Web","Guardian Headline Full",Georgia,serif;
-    	font-weight: 400;
-    	font-weight: 600;
-    	padding-left: 80px;
-    	padding-bottom: 2px;
-    	padding-right: 10px;
-    	padding-top: 2px;
-    	color: #121212;
-    }
+	h3{
+		@include fs-headline(5);
+		font-weight:300;
+		color: #121212;
+	}
 }
 
 .scroll-text__inner {
@@ -316,42 +332,35 @@
 		opacity: 0.25;
 		transition: opacity 0.5s ease-in-out;
 	}
-	border-top: 1px solid #121212;
-	padding-bottom: 24px;
-    position: relative;
+	border-top: 4px solid #8CCAFB;
+	padding-bottom: 12px;
+	position: relative;
+	background: white;
 
-    .date{
-    	position: absolute;
-    	width: 20px;
-    	font-size: 20px;
-    	line-height: 44px;
-    	font-family: "Guardian Titlepiece","Guardian Headline Full","Guardian Headline","Guardian Egyptian Web",Georgia,serif;
-    	font-weight: 700;
-    	font-variant-numeric: lining-nums;
-    	-webkit-font-feature-settings: "lnum";
-    	font-feature-settings: "lnum";
-    	top: 10px;
-    	line-height: 26px;
-    }
-    
+	.blob-text-wrapper{
+		padding:12px;
 
-    .paragraph{
-    	word-break: break-word;
-    	font-family: GuardianTextEgyptian,Guardian Text Egyptian Web,Georgia,serif;
-    	font-size: 1.0625rem;
-    	line-height: 1.5;
-    	font-weight: 400;
-    	color: #121212;
-    	padding-left: 80px;
-    	padding-right: 10px;
-    	margin: 0;
-    }
+		.date{
+			font-size: 20px;
+			font-family: fs-headline(5);
+			font-weight: 700;
+			margin:0;
+		}
+
+
+		.paragraph{
+			@include fs-bodyCopy(2);
+			color: #121212;
+
+		}
+	}
+
+
 }
 
-.gv-main-video{
-width: 456px;
-display: block;
-}
+.scroll-text__inner:not(:last-child){
 
+	border-left: 1px solid #bababa;
+}
 
 

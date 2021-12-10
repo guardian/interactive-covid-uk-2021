@@ -25,9 +25,11 @@ export async function render() {
 			    	<div class="date-bullet"></div>
 			    		<div class="scroll-text__div">
 			    			${img}
-			    			<p class="date">${date}</p>
-			    			<h3>${d.annotation_title}</h3>
-			    			<p class="paragraph">${d.annotation_text}</p>
+			    			<div class="blob-text-wrapper">
+				    			<p class="date">${date}</p>
+				    			<h3>${d.annotation_title}</h3>
+				    			<p class="paragraph">${d.annotation_text}</p>
+			    			</div>
 			    		</div>
 			    	</div>`
 			cont ++
@@ -41,7 +43,13 @@ export async function render() {
         <div class="scroll-inner">
         	<div class="uk-covid-wrapper">
 	            <div class="svg-wrapper"></div>
-	            <div class="chart-data"></div>
+	            <div class="chart-data">
+	            	<div class="date"></div>
+	            	<div class="ranking"></div>
+	            	<div class="deaths"></div>
+	            	<div class="vaccines"></div>
+	            	<div class="booster"></div>
+	            </div>
 	         </div>
         </div>
     	<div class="scroll-text">${html}</div>
