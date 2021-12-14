@@ -95,8 +95,10 @@ class ScrollyTeller {
                         this.textBoxes.forEach((el, j) => {
                             if(j <= i) {
                                 el.style.opacity = "1";
+                                el.style['border-left'] = "0";
                             } else {
                                 el.style.opacity = "0.25";
+                                el.style['border-left'] = "1px solid #121212";
                             }
                         });
                     }

@@ -10,6 +10,7 @@ export async function render() {
 
 	let data = rawData.sheets['master-data']
 
+
 	let html = ''
 	let cont = 0;
 
@@ -36,7 +37,7 @@ export async function render() {
 		}
     })
 
-    fs.writeFileSync(`assets/json/data.json`, JSON.stringify(data));
+   fs.writeFileSync(`assets/json/data.json`, JSON.stringify(data));
 
    return `<div id="gv-scrolly-1">
     <div class="scroll-wrapper">
@@ -44,8 +45,11 @@ export async function render() {
         	<div class="uk-covid-wrapper">
 	            <div class="svg-wrapper"></div>
 	            <div class="chart-data">
-	            	<div class="date"></div>
-	            	<div class="ranking"></div>
+	            	<div class="ranking">
+	            		<p class="date"></p>
+	            		<p class="ranking-annotation"></p>
+	            		<p class="ranking-value"></p>
+	            	</div>
 	            	<div class="deaths"></div>
 	            	<div class="vaccines"></div>
 	            	<div class="booster"></div>
