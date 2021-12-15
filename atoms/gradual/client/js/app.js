@@ -28,30 +28,30 @@ const chart = d3.select('.svg-wrapper')
 .attr('width', width)
 .attr('height', height);
 
-const defs = chart.append('defs')
+//const defs = chart.append('defs')
 
-let mask = defs
+/*let mask = defs
 .append('clipPath')
 .attr('id', 'clip-mask')
-.style('transform', `translate(-${margin.left}px,0)`)
+.style('transform', `translate(-${margin.left}px,0)`)*/
 
-let linearGradient = defs.append('linearGradient')
+/*let linearGradient = defs.append('linearGradient')
 .attr('id','grad1')
 .attr('x1', '0%')
 .attr('y1', '0%')
 .attr('x2', '100%')
-.attr('y2', '0%')
+.attr('y2', '0%')*/
 
-let gradient = chart
+/*let gradient = chart
 .append('rect')
 .attr('width', width - margin.left - margin.right)
 .attr('height', height)
 .style('transform', `translate(${margin.left}px,0)`)
 .style('fill', 'url(#grad1')
-.style('clip-path', 'url(#clip-mask)')
+.style('clip-path', 'url(#clip-mask)')*/
 
 
-const colorScale = (value) => {
+/*const colorScale = (value) => {
 
 	let v;
 
@@ -63,49 +63,51 @@ const colorScale = (value) => {
 
 	return v
 }
+*/
 
 
 
-const axis = chart.append('g')
 const areas = chart.append('g')
+const axis = chart.append('g')
 const lines = chart.append('g')
 const dots = chart.append('g')
 
+
 let deathsArea = lines.append('path').attr("class", "covid-area deaths-area")
-let vaccinesArea = lines.append('path').attr("class", "covid-area vaccines-area")
-let boostArea = lines.append('path').attr("class", "covid-area vaccines-area")
+let vaccinesArea = areas.append('path').attr("class", "covid-area vaccines-area")
+let boostArea = areas.append('path').attr("class", "covid-area vaccines-area")
 
 let deathsLine = lines.append("path").attr("class", "covid-line deaths-line")
-let vaccinesLine = lines.append("path").attr("class", "covid-line vaccines-line")
-let boostLine = lines.append("path").attr("class", "covid-line boost-line")
+//let vaccinesLine = lines.append("path").attr("class", "covid-line vaccines-line")
+//let boostLine = lines.append("path").attr("class", "covid-line boost-line")
 
 let mark = lines.append('path').attr('class', 'date-mark').attr('d', `M${margin.left},${margin.top - 35},${margin.left},${height-margin.bottom}`)
 
-let maskArea = d3.select('#clip-mask').append('path').attr("class", "covid-area")
+//let maskArea = d3.select('#clip-mask').append('path').attr("class", "covid-area")
 
 let deathsDot = dots.append('circle')
-let vaccinesDot = dots.append('circle')
-let boostDot = dots.append('circle')
+//let vaccinesDot = dots.append('circle')
+//let boostDot = dots.append('circle')
 
 const xScale =  d3.scaleTime();
 const yDeathsScale = d3.scaleLinear();
 const yVaccinesScale = d3.scaleLinear();
 
-const dates = data.map(d => moment(d.Day, 'DD/MM/YYYY'))
+//const dates = data.map(d => moment(d.Day, 'DD/MM/YYYY'))
 
 const dataObj = data.map(d => {
 
 	let index = +d.stringency_index == 0 ? null : +d.stringency_index;
 
-	return {date:moment(d.Day, 'DD/MM/YYYY'), deaths:+d.cum_deaths, vaccines:+d.fully_vaccinated_rate, booster:+d.booster_rate, stringency:+d.stringency_index, ranking:d.stringency_ranking, title:d.annotation_title, text:d.annotation_text}
+	return {date:moment(d.Day, 'DD/MM/YYYY'), deaths:+d.cum_deaths, vaccines:+d.fully_vaccinated_rate, booster:+d.booster_rate, /*stringency:+d.stringency_index, */ranking:d.stringency_ranking, /*title:d.annotation_title,*/ text:d.annotation_text != '' ? true : null}
 
 });
 
-let stringency = {date:dataObj[0].date, stringency:dataObj[0].stringency};
+/*let stringency = {date:dataObj[0].date, stringency:dataObj[0].stringency};
 
-const dayPer = 100 / dataObj.length;
+const dayPer = 100 / dataObj.length;*/
 
-linearGradient.append('stop')
+/*linearGradient.append('stop')
 .attr('offset', '0%')
 .style('stop-color',colorScale(dataObj[0].ranking))
 
@@ -132,9 +134,11 @@ const stringencyDates = dataObj.forEach((d,i) => {
 
 	}
 
-})
+})*/
 
-const annotationDates = dataObj.filter(d => d.text != '')
+console.log(dataObj)
+
+const annotationDates = dataObj.filter(d => d.text)
 
 const datesExtent = d3.extent(dataObj, d => d.date);
 
@@ -152,7 +156,7 @@ yDeathsScale
 
 yVaccinesScale
 .range([margin.top, height - margin.bottom])
-.domain([d3.max(fullyVaccinatedExtent), 0])
+.domain([80, 0])//requested to be hardcoded
 
 const line = d3.line()
 .curve(d3.curveLinear)
@@ -215,12 +219,6 @@ let leftAxis = axis.append("g")
 })
 
 
-d3.selectAll(".leftAxis .tick")
-.append('line')
-.attr('x2', width - margin.left - margin.right)
-.attr('class', 'white-line')
-
-
 let rightAxis = axis.append("g")
 .attr("class", "rightAxis")
 .attr("transform", `translate(${isMobile ? width - 55 : width},0)`)
@@ -258,6 +256,11 @@ let rightAxis = axis.append("g")
 	})
 })
 
+d3.selectAll(".rightAxis .tick")
+.append('line')
+.attr('x2', -width + margin.left)
+.attr('class', 'white-line')
+
 
 
 deathsDot
@@ -266,7 +269,7 @@ deathsDot
 .attr('cy', yDeathsScale(dataObj[0].deaths))
 .attr('class', 'deaths-dot')
 
-vaccinesDot
+/*vaccinesDot
 .attr('r', 6)
 .attr('cx', xScale(dataObj[0].date))
 .attr('cy', yVaccinesScale(dataObj[0].vaccines))
@@ -276,12 +279,12 @@ boostDot
 .attr('r', 6)
 .attr('cx', xScale(dataObj[0].date))
 .attr('cy', yVaccinesScale(dataObj[0].booster))
-.attr('class', 'boost-dot')
+.attr('class', 'boost-dot')*/
 
 const scrolly = new ScrollyTeller({
 	parent: document.querySelector("#gv-scrolly-1"),
-	    triggerTop: 0.03, // percentage from the top of the screen that the trigger should fire
-	    triggerTopMobile:.54,
+	    triggerTop: 0.019, // percentage from the top of the screen that the trigger should fire
+	    triggerTopMobile:.52,
 	    transparentUntilActive: false,
 	    overall: () => {}
 	})
@@ -326,21 +329,21 @@ scrolly.gradual( (progressInBox, i, abs, total) => {
 			return line(allData)
 		})
 
-		deathsArea
+		/*deathsArea
 		.attr("d", () => {
 			area.y1(line.y())
 			area.defined(line.defined())
 
 			return area(allData)
-		})
+		})*/
 
-		vaccinesLine
+		/*vaccinesLine
 		.attr("d", () => {
 			line.y(d => yVaccinesScale(d.vaccines))
 			line.defined(d => d.vaccines)
 
 			return line(allData)
-		})
+		})*/
 
 		vaccinesArea
 		.attr("class", "covid-area vaccines-area")
@@ -352,14 +355,14 @@ scrolly.gradual( (progressInBox, i, abs, total) => {
 			return area(allData)
 		});
 
-		boostLine
+		/*boostLine
 		.attr("d", () => {
 
 			line.y(d => yVaccinesScale(d.booster))
 			line.defined(d => d.booster)
 
 			return line(allData)
-		})
+		})*/
 
 		boostArea
 		.attr("class", "covid-area boost-area")
@@ -371,14 +374,14 @@ scrolly.gradual( (progressInBox, i, abs, total) => {
 			return area(allData)
 		});
 
-		if(deathsArea.attr('d') && vaccinesArea.attr('d'))
+		/*if(deathsArea.attr('d') && vaccinesArea.attr('d'))
 		{
 			maskArea.attr('d', deathsArea.attr('d') + vaccinesArea.attr('d'))
 		}
 		else
 		{
 			maskArea.attr('d', deathsArea.attr('d'))
-		}
+		}*/
 
 
 
@@ -414,7 +417,7 @@ const manageTooltip = (data) => {
 	date.html(data.date.format('MMM Do'))
 	ranking.select('.ranking-annotation').html('Lockdown level:')
 	ranking.select('.ranking-value').html(data.ranking)
-	ranking.select('.ranking-value').style('color', colorScale(data.ranking))
+	//ranking.select('.ranking-value').style('color', colorScale(data.ranking))
 	
 	
 	
@@ -439,34 +442,36 @@ const manageTooltip = (data) => {
 	.attr('cy', yDeathsScale(data.deaths))
 
 	if(data.vaccines > 0){
-		vaccinesDot
+		/*vaccinesDot
 		.attr('cx', xDate)
 		.attr('cy', yVaccinesScale(data.vaccines))
-		.style('display', 'block')
+		.style('display', 'block')*/
 
 		vaccines.html(data.vaccines + '%')
 	}
 	else
 	{
-		vaccinesDot.style('display', 'none')
+		//vaccinesDot.style('display', 'none')
 
 		vaccines.html('')
 	}
 
 	if(data.booster > 0)
 	{
-		boostDot
+		/*boostDot
 		.attr('cx', xDate)
 		.attr('cy', yVaccinesScale(data.booster))
-		.style('display', 'block')
+		.style('display', 'block')*/
 
-		booster.html(data.booster + '%')
+		booster.select('.booster-value').html(data.booster + '%')
+		booster.select('.booster-text').html('booster')
 	}
 	else
 	{
-		boostDot.style('display', 'none')
+		//boostDot.style('display', 'none')
 
-		booster.html('')
+		booster.select('.booster-value').html('')
+		booster.select('.booster-text').html('')
 	}
 
 }

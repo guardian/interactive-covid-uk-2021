@@ -39,28 +39,6 @@ export async function render() {
 
    fs.writeFileSync(`assets/json/data.json`, JSON.stringify(data));
 
-   return `<div id="gv-scrolly-1">
-    <div class="scroll-wrapper">
-        <div class="scroll-inner">
-        	<div class="uk-covid-wrapper">
-	            <div class="svg-wrapper"></div>
-	            <div class="chart-data">
-	            	<div class="ranking">
-	            		<p class="date"></p>
-	            		<p class="ranking-annotation"></p>
-	            		<p class="ranking-value"></p>
-	            	</div>
-	            	<div class="deaths"></div>
-	            	<div class="vaccines"></div>
-	            	<div class="booster">
-	            		<p class="booster-value"></p>
-	            		<p class="booster-text"></p>
-	            	</div>
-	            </div>
-	         </div>
-        </div>
-    	<div class="scroll-text">${html}</div>
-    </div>
-</div>`
+   return `<div id="covid-uk-print"></div>`
    
 } 
