@@ -20,7 +20,7 @@ const width = isMobile ? atomEl.getBoundingClientRect().width : atomEl.getBoundi
 const wHeight = Math.max(document.documentElement.clientHeight || 0, window.innerHeight || 0)
 const height = isMobile ? wHeight / 2 : wHeight * .6;
 
-const margin = {left:45, top:120, right:isMobile ? 150 : 100, bottom:20}
+const margin = {left:50, top:120, right:isMobile ? 140 : 100, bottom:20}
 
 const chart = d3.select('.svg-wrapper')
 .append('svg')
@@ -136,8 +136,6 @@ const stringencyDates = dataObj.forEach((d,i) => {
 
 })*/
 
-console.log(dataObj)
-
 const annotationDates = dataObj.filter(d => d.text)
 
 const datesExtent = d3.extent(dataObj, d => d.date);
@@ -173,12 +171,14 @@ let xaxis = axis.append("g")
 .attr("class", "xaxis")
 .call(
 	d3.axisBottom(xScale)
-	.ticks(isMobile?7:12)
 	.tickFormat(d3.timeFormat("%b"))
-
-
 	)
-.selectAll("text")
+
+
+xaxis.selectAll('.tick').nodes()
+.forEach((d,i) => {i%3 === 0 && isMobile ? d.style.display = "block" : !isMobile ? d.style.display = "block" : d.style.display = "none"})
+
+
 
 let leftAxis = axis.append("g")
 .attr("class", "leftAxis")
@@ -204,14 +204,14 @@ let leftAxis = axis.append("g")
 			.append("tspan")
 			.text('deaths')
 			.attr('class','axis-label')
-			.attr("x", "-43px")
+			.attr("x", "-48px")
 			.attr("y", `-${margin.top - 90}px`)
 
 	        let label2 = d3.select('.left-label-0')
 			.append("tspan")
 			.attr('class','axis-label')
 			.text('2021')
-			.attr("x", "-43px")
+			.attr("x", "-48px")
 			.attr("y", `-${margin.top - 75}px`)
 		}
 		
@@ -414,7 +414,7 @@ const manageTooltip = (data) => {
 
 	let yPositionsRight = dodge([yDeathsScale(data.deaths), yVaccinesScale(data.vaccines), yVaccinesScale(data.booster)],20)
 
-	date.html(data.date.format('MMM Do'))
+	date.html(data.date.format('D MMMM'))
 	ranking.select('.ranking-annotation').html('Lockdown level:')
 	ranking.select('.ranking-value').html(data.ranking)
 	//ranking.select('.ranking-value').style('color', colorScale(data.ranking))

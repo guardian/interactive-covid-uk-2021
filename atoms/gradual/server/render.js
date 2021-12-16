@@ -18,7 +18,7 @@ export async function render() {
 
 		if(d.annotation_text){
 
-			let date = moment(d.Day, 'DD/MM/YYYY').format('MMM Do');
+			let date = moment(d.Day, 'DD/MM/YYYY').format('D MMMM');
 
 			let img = d.annotation_image != '' ? `<div class="timeline-img-wrapper"><div class="timeline-img" style="background-image: url(<%= path %>/media/${d.annotation_image});"></div></div>` : '';
 
@@ -39,7 +39,8 @@ export async function render() {
 
    fs.writeFileSync(`assets/json/data.json`, JSON.stringify(data));
 
-   return `<div id="gv-scrolly-1">
+   return `<div class="gv-text-section"></div>
+   <div id="gv-scrolly-1">
     <div class="scroll-wrapper">
         <div class="scroll-inner">
         	<div class="uk-covid-wrapper">
@@ -61,6 +62,7 @@ export async function render() {
         </div>
     	<div class="scroll-text">${html}</div>
     </div>
-</div>`
+</div>
+<div class="gv-text-section"></div>`
    
 } 
