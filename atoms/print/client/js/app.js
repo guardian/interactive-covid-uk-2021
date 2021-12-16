@@ -35,30 +35,37 @@ const xScale =  d3.scaleTime();
 const yDeathsScale = d3.scaleLinear();
 const yVaccinesScale = d3.scaleLinear();
 
-const dataObj = data.map(d => {
 
-	let index = +d.stringency_index == 0 ? null : +d.stringency_index;
+d3.json('https://interactive.guim.co.uk/docsdata-test/1XymBcR_xu0GwpGFsoICE22NH1o_beJ5BiINB6NS6fLg.json')
+.then(rawData => {
 
-	return {date:moment(d.Day, 'DD/MM/YYYY'), deaths:+d.cum_deaths, vaccines:+d.fully_vaccinated_rate, booster:+d.booster_rate, stringency:+d.stringency_index, ranking:d.stringency_ranking, title:d.annotation_title, text:d.annotation_text}
+	let data = rawData.sheets['master-data']
 
-});
 
-const datesExtent = d3.extent(dataObj, d => d.date);
+	const dataObj = data.map(d => {
 
-const rollingDeathsExtent = d3.extent(dataObj.map(d => +d.deaths))
+		let index = +d.stringency_index == 0 ? null : +d.stringency_index;
 
-const fullyVaccinatedExtent = d3.extent(dataObj.map(d => +d.vaccines))
+		return {date:moment(d.Day, 'DD/MM/YYYY'), deaths:+d.cum_deaths, vaccines:+d.fully_vaccinated_rate, booster:+d.booster_rate, stringency:+d.stringency_index, ranking:d.stringency_ranking, title:d.annotation_title, text:d.annotation_text}
 
-xScale
-.range([margin.left, width - margin.right])
-.domain(datesExtent)
+	});
 
-yDeathsScale
-.range([margin.top, height - margin.bottom])
-.domain([d3.max(rollingDeathsExtent), 0])
+	const datesExtent = d3.extent(dataObj, d => d.date);
 
-yVaccinesScale
-.range([margin.top, height - margin.bottom])
+	const rollingDeathsExtent = d3.extent(dataObj.map(d => +d.deaths))
+
+	const fullyVaccinatedExtent = d3.extent(dataObj.map(d => +d.vaccines))
+
+	xScale
+	.range([margin.left, width - margin.right])
+	.domain(datesExtent)
+
+	yDeathsScale
+	.range([margin.top, height - margin.bottom])
+	.domain([d3.max(rollingDeathsExtent), 0])
+
+	yVaccinesScale
+	.range([margin.top, height - margin.bottom])
 .domain([d3.max(fullyVaccinatedExtent), 0])//requested to be hardcoded
 
 const area = d3.area()
@@ -81,7 +88,7 @@ deaths.append("g")
 	d3.axisBottom(xScale)
 	.ticks(12)
 	.tickFormat(d3.timeFormat("%b"))
-)
+	)
 .selectAll("text")
 
 deaths.append("g")
@@ -118,7 +125,7 @@ vaccines.append("g")
 	d3.axisBottom(xScale)
 	.ticks(12)
 	.tickFormat(d3.timeFormat("%b"))
-)
+	)
 .selectAll("text")
 
 vaccines.append("g")
@@ -163,4 +170,8 @@ const vaccinesDates = vaccines.selectAll('blah')
 .text(d => d.date.format('DD/MM') + '-' + d.vaccines + '-' + d.booster)
 
 
+
+
+
+})
 
