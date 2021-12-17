@@ -254,9 +254,9 @@
 
 .timeline-img-wrapper{
 	width: 100%;
-	max-width: 434px;
-	height: 260px;
-	max-height: 277px;
+	//max-width: 434px;
+	min-height: 240px;
+	//max-height: 277px;
 	padding-bottom: 50%;
 	position: relative;
 
@@ -266,7 +266,8 @@
 		right: 0;
 		bottom: 0;
 		top: 0;
-		background-size: cover;
+		background-repeat: no-repeat;
+		background-size: 100%;
 	}
 }
 
