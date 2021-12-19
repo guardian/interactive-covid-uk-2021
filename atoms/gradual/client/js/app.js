@@ -20,6 +20,11 @@ const width = isMobile ? atomEl.getBoundingClientRect().width : atomEl.getBoundi
 const wHeight = Math.max(document.documentElement.clientHeight || 0, window.innerHeight || 0)
 const height = isMobile ? wHeight / 2 : wHeight * .6;
 
+var userAgent = navigator.userAgent.toLowerCase();
+var isAndroid = userAgent.indexOf("android") > -1;
+
+console.log('wHeight:',wHeight, 'height:',height, userAgent, isAndroid)
+
 const margin = {left:50, top:120, right:isMobile ? 140 : 100, bottom:20}
 
 const chart = d3.select('.svg-wrapper')
@@ -284,7 +289,7 @@ boostDot
 const scrolly = new ScrollyTeller({
 	parent: document.querySelector("#gv-scrolly-1"),
 	    triggerTop: 0.019, // percentage from the top of the screen that the trigger should fire
-	    triggerTopMobile:.52,
+	    triggerTopMobile:isAndroid ? .43 : .52,
 	    transparentUntilActive: false,
 	    overall: () => {}
 	})

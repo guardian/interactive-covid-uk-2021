@@ -318,7 +318,6 @@
 		width: calc(100% - 434px);
 		bottom: 28px;
 		border-bottom: 4px solid #dadada;
-		width: calc(100% - 434px);
 		z-index: -1;
 	}
 
@@ -360,7 +359,7 @@
 	margin-left:9px;
 	
 	@include mq(mobile) {
-		top:calc(50vh + 12px);
+		//top:calc(50vh + 12px);
 		margin-left:0;
 		width: 100%;
 	}
