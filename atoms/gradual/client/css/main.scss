@@ -49,29 +49,30 @@
 article .content--interactive::before, .article__header::before {
     //z-index: -1;
     content: "";
-    background-size: auto 100%;
+    background-size: cover;
     background-repeat: no-repeat;
     position: absolute;
     clear: both;
-    background-image: url('<%= path %>/assets/header/mobile-header.png');
+    background-image: url('<%= path %>/header/mobile_header.jpg');
     width: 100%;
     margin-left: -10px;
     height: 290px;
     background-position: center bottom;
-	background-color: red;
+	background-color: #eaeaea;
 
     @include mq(mobileLandscape) {
-        background-size: auto 100%;
+       
         height: 350px;
 		margin-left: -20px;
     }
 
-    @include mq(desktop) {
-        background-image: url('<%= path %>/header/Header_v1.png');
-        background-position: center bottom;
-        //height : 350px;
-        //background-repeat: no-repeat;
-        //background-size: 100%;
+    @include mq(tablet) {
+		background-size: auto 100%;
+        background-image: url('<%= path %>/header/desktop_header.jpg');
+    }
+
+	@include mq(leftCol) {
+        background-image: url('<%= path %>/header/wide_header.jpg');
     }
 }
 
