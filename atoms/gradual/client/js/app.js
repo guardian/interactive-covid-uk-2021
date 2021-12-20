@@ -420,7 +420,7 @@ const manageTooltip = (data) => {
 	let yPositionsRight = dodge([yDeathsScale(data.deaths), yVaccinesScale(data.vaccines), yVaccinesScale(data.booster)],20)
 
 	date.html(data.date.format('D MMMM'))
-	ranking.select('.ranking-annotation').html('Lockdown level:')
+	ranking.select('.ranking-annotation').html('Restrictions level:')
 	ranking.select('.ranking-value').html(data.ranking)
 	//ranking.select('.ranking-value').style('color', colorScale(data.ranking))
 	
