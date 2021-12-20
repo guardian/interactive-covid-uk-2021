@@ -22,6 +22,59 @@
 	}
 }
 
+
+// Header image inject
+
+.content__headline, .headline {
+
+    @include fs-titlepiece(1);
+    margin-top: 290px;
+    @include mq(mobileLandscape) {
+        margin-top: 360px;
+    }
+    @include mq(desktop) {
+        @include fs-titlepiece(2);
+        margin-top: 360px;
+    }
+}
+
+.article__header {
+    background: transparent !important;
+
+    &::before {
+        margin-left: 0 !important;
+    }
+}
+
+article .content--interactive::before, .article__header::before {
+    //z-index: -1;
+    content: "";
+    background-size: auto 100%;
+    background-repeat: no-repeat;
+    position: absolute;
+    clear: both;
+    background-image: url('<%= path %>/assets/header/mobile-header.png');
+    width: 100%;
+    margin-left: -10px;
+    height: 290px;
+    background-position: center bottom;
+	background-color: red;
+
+    @include mq(mobileLandscape) {
+        background-size: auto 100%;
+        height: 350px;
+		margin-left: -20px;
+    }
+
+    @include mq(desktop) {
+        background-image: url('<%= path %>/header/Header_v1.png');
+        background-position: center bottom;
+        //height : 350px;
+        //background-repeat: no-repeat;
+        //background-size: 100%;
+    }
+}
+
 .svg-wrapper{
 	position: relative;
 	width: 100%;
