@@ -215,7 +215,7 @@ let leftAxis = axis.append("g")
 	        let label2 = d3.select('.left-label-0')
 			.append("tspan")
 			.attr('class','axis-label')
-			.text('2021')
+			.text('Covid-19')
 			.attr("x", "-48px")
 			.attr("y", `-${margin.top - 75}px`)
 		}
